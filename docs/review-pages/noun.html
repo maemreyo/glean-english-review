@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noun Master Challenge v3 - Học Tiếng Anh</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+            user-select: none;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .animate-bounce-short {
+            animation: bounce 0.5s infinite alternate;
+        }
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-10px); }
+        }
+        .correct-anim { animation: flashGreen 0.5s; }
+        .wrong-anim { animation: shake 0.5s; }
+        @keyframes flashGreen {
+            0% { background-color: #4ade80; }
+            100% { background-color: white; }
+        }
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); background-color: #f87171; }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); background-color: white; }
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+        
+        .review-item.correct { border-left: 5px solid #4ade80; background-color: #f0fdf4; }
+        .review-item.wrong { border-left: 5px solid #f87171; background-color: #fef2f2; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- AUDIO ELEMENTS -->
+    <audio id="snd-correct" src="https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3"></audio>
+    <audio id="snd-wrong" src="https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3"></audio>
+    <audio id="snd-win" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3"></audio>
+
+    <div class="bg-white/95 backdrop-blur-sm w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden border-4 border-white flex flex-col max-h-[90vh]">
+        
+        <!-- HEADER -->
+        <div class="bg-indigo-600 p-4 md:p-6 text-center relative shrink-0">
+            <h1 class="text-2xl md:text-3xl font-black text-white tracking-wide uppercase drop-shadow-md">
+                <i class="fas fa-graduation-cap mr-2"></i> Noun Master
+            </h1>
+            <p class="text-indigo-200 mt-1 text-sm">Thử thách Danh từ v3.0</p>
+            <div id="score-board" class="hidden absolute top-4 right-4 md:top-6 md:right-6 bg-white text-indigo-700 px-3 py-1 rounded-full font-bold shadow-lg text-sm md:text-base">
+                Điểm: <span id="current-score">0</span>
+            </div>
+        </div>
+
+        <!-- MENU SCREEN -->
+        <div id="menu-screen" class="p-8 text-center space-y-6 overflow-y-auto">
+            <div class="space-y-2">
+                <h2 class="text-2xl font-bold text-gray-800">Chọn chế độ chơi</h2>
+                <p class="text-gray-500">Mời các bạn học sinh chọn thử thách!</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button onclick="startGame('types')" class="card-hover group p-6 bg-blue-100 hover:bg-blue-500 rounded-xl transition-all duration-300 border-2 border-blue-200 cursor-pointer">
+                    <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">📦</div>
+                    <h3 class="font-bold text-blue-800 group-hover:text-white text-lg">Phân loại Danh từ</h3>
+                    <p class="text-blue-600 group-hover:text-blue-100 text-sm mt-2">Toàn bộ kho câu hỏi (Common, Proper...)</p>
+                </button>
+
+                <button onclick="startGame('functions')" class="card-hover group p-6 bg-purple-100 hover:bg-purple-500 rounded-xl transition-all duration-300 border-2 border-purple-200 cursor-pointer">
+                    <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">⚙️</div>
+                    <h3 class="font-bold text-purple-800 group-hover:text-white text-lg">Chức năng Danh từ</h3>
+                    <p class="text-purple-600 group-hover:text-purple-100 text-sm mt-2">Toàn bộ kho câu hỏi (Subject, Object...)</p>
+                </button>
+            </div>
+        </div>
+
+        <!-- GAME SCREEN -->
+        <div id="game-screen" class="hidden p-4 md:p-8 overflow-y-auto">
+            <!-- Progress Bar -->
+            <div class="w-full bg-gray-200 rounded-full h-2.5 mb-6">
+                <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+
+            <!-- Question Area -->
+            <div class="text-center mb-6 md:mb-8">
+                <span id="question-label" class="inline-block px-3 py-1 bg-gray-100 text-gray-500 rounded-full text-xs font-bold uppercase tracking-wider mb-3">Câu hỏi 1/20</span>
+                
+                <div id="question-content" class="text-2xl md:text-3xl font-bold text-gray-800 mb-2 min-h-[60px] md:min-h-[80px] flex items-center justify-center px-4 leading-tight">
+                    <!-- Dynamic Content -->
+                </div>
+                <p id="question-hint" class="text-gray-500 text-sm italic min-h-[1.5rem]"></p>
+            </div>
+
+            <!-- Answer Options -->
+            <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                <!-- Buttons will be injected here -->
+            </div>
+
+            <!-- Explanation Modal (Hidden initially) -->
+            <div id="feedback-area" class="hidden mt-6 p-4 rounded-xl bg-red-50 border border-red-200 text-left animate-fade-in">
+                <h4 class="font-bold text-red-600 flex items-center"><i class="fas fa-exclamation-circle mr-2"></i> Chưa chính xác!</h4>
+                <p id="feedback-text" class="text-gray-700 mt-1 text-sm"></p>
+                <button onclick="nextQuestion()" class="mt-3 bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-red-600 w-full transition-colors">Tiếp tục <i class="fas fa-arrow-right ml-1"></i></button>
+            </div>
+        </div>
+
+        <!-- RESULT SCREEN -->
+        <div id="result-screen" class="hidden flex flex-col h-full overflow-hidden">
+            <div class="p-6 text-center shrink-0">
+                <div class="text-5xl mb-2 animate-bounce-short">🏆</div>
+                <h2 class="text-2xl font-bold text-gray-800">Hoàn thành!</h2>
+                
+                <div class="bg-indigo-50 rounded-xl p-4 mt-4 inline-block min-w-[200px]">
+                    <div class="text-xs text-indigo-500 uppercase font-bold tracking-wider">Tổng điểm</div>
+                    <div class="text-4xl font-black text-indigo-600 my-1"><span id="final-score">0</span><span id="max-score" class="text-xl text-indigo-300">/100</span></div>
+                </div>
+            </div>
+
+            <!-- Review Section -->
+            <div class="flex-1 overflow-y-auto px-6 pb-6 bg-gray-50 border-t">
+                <h3 class="text-lg font-bold text-gray-700 my-4 sticky top-0 bg-gray-50 py-2 border-b"><i class="fas fa-history mr-2"></i>Chi tiết bài làm</h3>
+                <div id="review-list" class="space-y-3">
+                    <!-- Review items injected here -->
+                </div>
+            </div>
+            
+            <div class="p-4 bg-white border-t shrink-0 text-center shadow-[0_-5px_10px_rgba(0,0,0,0.05)]">
+                <button onclick="location.reload()" class="bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-indigo-700 hover:shadow-xl transition-all transform hover:-translate-y-1 w-full md:w-auto">
+                    <i class="fas fa-redo mr-2"></i> Chơi lại
+                </button>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="bg-gray-50 p-2 text-center text-[10px] text-gray-400 border-t shrink-0">
+            Teacher Tools for Classroom Interaction
+        </div>
+
+    </div>
+
+    <!-- CONFETTI SCRIPT -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+    <script>
+        // --- DATA SOURCES (EXPANDED) ---
+        // Giữ nguyên dữ liệu cũ và thêm một vài câu cho phong phú
+        
+        const dataTypes = [
+            { q: "Teacher", type: "Common Noun", hint: "Chỉ nghề nghiệp chung chung.", explain: "'Teacher' là danh từ chung chỉ người." },
+            { q: "Hanoi", type: "Proper Noun", hint: "Tên một thành phố cụ thể.", explain: "'Hanoi' là tên riêng, luôn viết hoa." },
+            { q: "Happiness", type: "Abstract Noun", hint: "Cảm xúc, không thể sờ thấy.", explain: "'Happiness' là danh từ trừu tượng." },
+            { q: "Team", type: "Collective Noun", hint: "Một nhóm người.", explain: "'Team' là danh từ tập hợp." },
+            { q: "Microsoft", type: "Proper Noun", hint: "Tên công ty cụ thể.", explain: "Tên riêng của tổ chức, viết hoa." },
+            { q: "Courage", type: "Abstract Noun", hint: "Sự dũng cảm.", explain: "'Courage' là danh từ trừu tượng chỉ phẩm chất." },
+            { q: "London", type: "Proper Noun", hint: "Thủ đô nước Anh.", explain: "Tên riêng địa danh." },
+            { q: "Audience", type: "Collective Noun", hint: "Nhóm khán giả.", explain: "'Audience' là danh từ tập hợp." },
+            { q: "River", type: "Common Noun", hint: "Dòng sông (chung chung).", explain: "'River' là danh từ chung." },
+            { q: "Freedom", type: "Abstract Noun", hint: "Sự tự do.", explain: "Khái niệm trừu tượng." },
+            { q: "Monday", type: "Proper Noun", hint: "Một ngày trong tuần.", explain: "Các thứ trong tuần là Danh từ riêng." },
+            { q: "Army", type: "Collective Noun", hint: "Quân đội.", explain: "'Army' là tập hợp lính." },
+            { q: "Friendship", type: "Abstract Noun", hint: "Tình bạn.", explain: "Mối quan hệ tình cảm -> Trừu tượng." },
+            { q: "Doctor", type: "Common Noun", hint: "Nghề nghiệp bác sĩ.", explain: "Danh từ chung chỉ người." },
+            { q: "Toyota", type: "Proper Noun", hint: "Tên hãng xe.", explain: "Thương hiệu cụ thể là danh từ riêng." },
+            { q: "Flock", type: "Collective Noun", hint: "Bầy chim/cừu.", explain: "'Flock' là danh từ tập hợp." },
+            { q: "July", type: "Proper Noun", hint: "Tháng 7.", explain: "Tháng trong năm là Danh từ riêng." },
+            { q: "Honesty", type: "Abstract Noun", hint: "Tính trung thực.", explain: "Phẩm chất đạo đức -> Trừu tượng." },
+            { q: "Computer", type: "Common Noun", hint: "Đồ vật điện tử.", explain: "Danh từ chung." },
+            { q: "Titanic", type: "Proper Noun", hint: "Tên con tàu.", explain: "Tên riêng của tàu." }
+        ];
+
+        const dataFunctions = [
+            { q: "<span class='text-indigo-600 border-b-4 border-indigo-300'>Tom</span> arrived late.", ans: "Subject (Chủ ngữ)", hint: "Đứng trước động từ.", explain: "Tom thực hiện hành động -> Chủ ngữ.", options: ["Subject (Chủ ngữ)", "Object (Tân ngữ)", "Complement (Bổ ngữ)", "Possessive (Sở hữu)"] },
+            { q: "I saw <span class='text-indigo-600 border-b-4 border-indigo-300'>Tom</span>.", ans: "Object of Verb (Tân ngữ động từ)", hint: "Đứng sau động từ 'saw'.", explain: "Tom chịu tác động -> Tân ngữ.", options: ["Subject (Chủ ngữ)", "Object of Verb (Tân ngữ động từ)", "Complement (Bổ ngữ)", "Object of Prep (Tân ngữ giới từ)"] },
+            { q: "She is a <span class='text-indigo-600 border-b-4 border-indigo-300'>teacher</span>.", ans: "Complement (Bổ ngữ)", hint: "Đứng sau tobe 'is'.", explain: "Giải thích She là ai -> Bổ ngữ.", options: ["Object (Tân ngữ)", "Complement (Bổ ngữ)", "Subject (Chủ ngữ)", "Possessive (Sở hữu)"] },
+            { q: "I talk to <span class='text-indigo-600 border-b-4 border-indigo-300'>Tom</span>.", ans: "Object of Prep (Tân ngữ giới từ)", hint: "Đứng sau giới từ 'to'.", explain: "Đứng sau giới từ -> Tân ngữ giới từ.", options: ["Object of Verb (Tân ngữ động từ)", "Object of Prep (Tân ngữ giới từ)", "Subject (Chủ ngữ)", "Complement (Bổ ngữ)"] },
+            { q: "This is <span class='text-indigo-600 border-b-4 border-indigo-300'>Tom's</span> book.", ans: "Possessive (Sở hữu cách)", hint: "Có dấu 's.", explain: "Chỉ sự sở hữu -> Sở hữu cách.", options: ["Subject (Chủ ngữ)", "Possessive (Sở hữu cách)", "Object (Tân ngữ)", "Complement (Bổ ngữ)"] },
+            { q: "<span class='text-indigo-600 border-b-4 border-indigo-300'>Birds</span> can fly.", ans: "Subject (Chủ ngữ)", hint: "Đứng đầu câu.", explain: "Chủ thể hành động -> Chủ ngữ.", options: ["Subject (Chủ ngữ)", "Object (Tân ngữ)", "Complement (Bổ ngữ)", "Possessive (Sở hữu)"] },
+            { q: "She bought a <span class='text-indigo-600 border-b-4 border-indigo-300'>car</span>.", ans: "Object of Verb (Tân ngữ động từ)", hint: "Đứng sau động từ 'bought'.", explain: "Mua cái gì? -> Tân ngữ động từ.", options: ["Subject (Chủ ngữ)", "Object of Verb (Tân ngữ động từ)", "Complement (Bổ ngữ)", "Possessive (Sở hữu)"] },
+            { q: "They became <span class='text-indigo-600 border-b-4 border-indigo-300'>doctors</span>.", ans: "Complement (Bổ ngữ)", hint: "Đứng sau động từ nối.", explain: "Sau động từ nối là Bổ ngữ.", options: ["Object (Tân ngữ)", "Complement (Bổ ngữ)", "Subject (Chủ ngữ)", "Possessive (Sở hữu)"] },
+            { q: "We live in <span class='text-indigo-600 border-b-4 border-indigo-300'>Vietnam</span>.", ans: "Object of Prep (Tân ngữ giới từ)", hint: "Đứng sau giới từ 'in'.", explain: "Tân ngữ giới từ.", options: ["Object of Verb (Tân ngữ động từ)", "Object of Prep (Tân ngữ giới từ)", "Subject (Chủ ngữ)", "Complement (Bổ ngữ)"] },
+            { q: "<span class='text-indigo-600 border-b-4 border-indigo-300'>The sun</span> is hot.", ans: "Subject (Chủ ngữ)", hint: "Đứng đầu câu.", explain: "Chủ ngữ của câu.", options: ["Subject (Chủ ngữ)", "Object (Tân ngữ)", "Complement (Bổ ngữ)", "Possessive (Sở hữu)"] },
+            { q: "Looking for <span class='text-indigo-600 border-b-4 border-indigo-300'>keys</span>.", ans: "Object of Prep (Tân ngữ giới từ)", hint: "Sau giới từ 'for'.", explain: "Tân ngữ giới từ.", options: ["Object of Verb (Tân ngữ động từ)", "Object of Prep (Tân ngữ giới từ)", "Subject (Chủ ngữ)", "Complement (Bổ ngữ)"] },
+            { q: "He seems <span class='text-indigo-600 border-b-4 border-indigo-300'>nice</span>.", ans: "Complement (Bổ ngữ)", hint: "Sau 'seems'.", explain: "Mô tả chủ ngữ -> Bổ ngữ.", options: ["Object (Tân ngữ)", "Complement (Bổ ngữ)", "Subject (Chủ ngữ)", "Possessive (Sở hữu)"] },
+            { q: "<span class='text-indigo-600 border-b-4 border-indigo-300'>Mary's</span> cat.", ans: "Possessive (Sở hữu cách)", hint: "Có dấu 's.", explain: "Sở hữu cách.", options: ["Subject (Chủ ngữ)", "Possessive (Sở hữu cách)", "Object (Tân ngữ)", "Complement (Bổ ngữ)"] },
+            { q: "Listen to <span class='text-indigo-600 border-b-4 border-indigo-300'>music</span>.", ans: "Object of Prep (Tân ngữ giới từ)", hint: "Sau 'to'.", explain: "Tân ngữ giới từ.", options: ["Object of Verb (Tân ngữ động từ)", "Object of Prep (Tân ngữ giới từ)", "Subject (Chủ ngữ)", "Complement (Bổ ngữ)"] },
+            { q: "Loves <span class='text-indigo-600 border-b-4 border-indigo-300'>coffee</span>.", ans: "Object of Verb (Tân ngữ động từ)", hint: "Sau 'loves'.", explain: "Tân ngữ động từ.", options: ["Subject (Chủ ngữ)", "Object of Verb (Tân ngữ động từ)", "Complement (Bổ ngữ)", "Possessive (Sở hữu)"] }
+        ];
+
+        // GAME STATE
+        let currentMode = '';
+        let currentQuestions = [];
+        let currentIndex = 0;
+        let score = 0;
+        let isAnswering = false;
+        let userHistory = []; // Lưu lịch sử trả lời để review
+
+        // SOUNDS
+        const sndCorrect = document.getElementById('snd-correct');
+        const sndWrong = document.getElementById('snd-wrong');
+        const sndWin = document.getElementById('snd-win');
+
+        function playSound(type) {
+            if(type === 'correct') { sndCorrect.currentTime = 0; sndCorrect.play(); }
+            if(type === 'wrong') { sndWrong.currentTime = 0; sndWrong.play(); }
+            if(type === 'win') { sndWin.currentTime = 0; sndWin.play(); }
+        }
+
+        // INIT
+        function startGame(mode) {
+            currentMode = mode;
+            score = 0;
+            currentIndex = 0;
+            userHistory = []; // Reset history
+            document.getElementById('current-score').innerText = score;
+            
+            // Lấy TOÀN BỘ dữ liệu và xáo trộn
+            let sourceData = (mode === 'types') ? [...dataTypes] : [...dataFunctions];
+            currentQuestions = sourceData.sort(() => 0.5 - Math.random());
+            // KHÔNG cắt slice nữa để lấy hết câu hỏi
+
+            // UI Switch
+            document.getElementById('menu-screen').classList.add('hidden');
+            document.getElementById('score-board').classList.remove('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+            
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentIndex >= currentQuestions.length) {
+                endGame();
+                return;
+            }
+
+            isAnswering = true;
+            const qData = currentQuestions[currentIndex];
+            
+            // UI Updates
+            document.getElementById('progress-bar').style.width = `${((currentIndex) / currentQuestions.length) * 100}%`;
+            document.getElementById('question-label').innerText = `Câu hỏi ${currentIndex + 1}/${currentQuestions.length}`;
+            document.getElementById('question-content').innerHTML = qData.q;
+            document.getElementById('question-hint').innerText = `Gợi ý: ${qData.hint}`;
+            document.getElementById('feedback-area').classList.add('hidden');
+            document.getElementById('options-container').innerHTML = '';
+
+            // Generate Options
+            let options = [];
+            if (currentMode === 'types') {
+                options = ["Common Noun", "Proper Noun", "Abstract Noun", "Collective Noun"];
+            } else {
+                options = qData.options;
+            }
+
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "p-3 md:p-4 bg-white border-2 border-indigo-100 rounded-xl text-indigo-700 font-bold hover:bg-indigo-50 hover:border-indigo-300 transition-all shadow-sm active:scale-95 text-base md:text-lg flex items-center justify-center";
+                btn.innerText = opt;
+                
+                btn.onclick = () => checkAnswer(opt, qData, btn);
+                document.getElementById('options-container').appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected, qData, btnElement) {
+            if (!isAnswering) return;
+            isAnswering = false;
+
+            let correctCondition = false;
+            let correctAnswerText = "";
+
+            if(currentMode === 'types') {
+                correctCondition = (selected === qData.type);
+                correctAnswerText = qData.type;
+            } else {
+                correctCondition = (selected === qData.ans);
+                correctAnswerText = qData.ans;
+            }
+
+            const allBtns = document.getElementById('options-container').children;
+
+            // Lưu lịch sử
+            userHistory.push({
+                question: qData.q,
+                userChoice: selected,
+                correctChoice: correctAnswerText,
+                isCorrect: correctCondition,
+                explain: qData.explain
+            });
+
+            if (correctCondition) {
+                // CORRECT
+                playSound('correct');
+                score += 10;
+                document.getElementById('current-score').innerText = score;
+                btnElement.classList.remove('bg-white', 'border-indigo-100');
+                btnElement.classList.add('bg-green-500', 'text-white', 'border-green-600', 'correct-anim');
+                
+                for(let b of allBtns) b.disabled = true;
+
+                setTimeout(() => {
+                    currentIndex++;
+                    loadQuestion();
+                }, 800);
+            } else {
+                // WRONG
+                playSound('wrong');
+                btnElement.classList.remove('bg-white', 'border-indigo-100');
+                btnElement.classList.add('bg-red-500', 'text-white', 'border-red-600', 'wrong-anim');
+                
+                for(let b of allBtns) {
+                    b.disabled = true;
+                    let val = b.innerText;
+                    if(val === correctAnswerText) {
+                         b.classList.add('bg-green-100', 'border-green-500', 'text-green-800');
+                         b.innerHTML += ` <i class="fas fa-check ml-2"></i>`;
+                    }
+                }
+
+                // Show Feedback Text
+                const fbArea = document.getElementById('feedback-area');
+                fbArea.classList.remove('hidden');
+                document.getElementById('feedback-text').innerText = qData.explain;
+            }
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            loadQuestion();
+        }
+
+        function endGame() {
+            playSound('win');
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('score-board').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            
+            const maxScore = currentQuestions.length * 10;
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('max-score').innerText = "/" + maxScore;
+            
+            // GENERATE REVIEW LIST
+            const reviewContainer = document.getElementById('review-list');
+            reviewContainer.innerHTML = ""; // Clear old
+
+            userHistory.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = `review-item p-4 rounded-lg text-left ${item.isCorrect ? 'correct' : 'wrong'}`;
+                
+                const icon = item.isCorrect ? '<i class="fas fa-check-circle text-green-500 text-xl"></i>' : '<i class="fas fa-times-circle text-red-500 text-xl"></i>';
+                
+                let contentHTML = `
+                    <div class="flex items-start gap-3">
+                        <div class="mt-1">${icon}</div>
+                        <div class="flex-1">
+                            <div class="font-bold text-gray-800 text-sm md:text-base mb-1">Câu ${index + 1}: ${item.question}</div>
+                            ${item.isCorrect 
+                                ? `<p class="text-sm text-green-700">Bạn đã chọn đúng: <b>${item.userChoice}</b></p>` 
+                                : `<p class="text-sm text-red-700 mb-1">Bạn chọn: <strike>${item.userChoice}</strike></p>
+                                   <p class="text-sm text-green-700 font-bold">Đáp án đúng: ${item.correctChoice}</p>`
+                            }
+                            <p class="text-xs text-gray-500 mt-2 bg-white/50 p-2 rounded border border-gray-200"><i class="fas fa-lightbulb text-yellow-500 mr-1"></i> ${item.explain}</p>
+                        </div>
+                    </div>
+                `;
+                div.innerHTML = contentHTML;
+                reviewContainer.appendChild(div);
+            });
+
+            // Confetti
+            var duration = 3 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+            function random(min, max) { return Math.random() * (max - min) + min; }
+            var interval = setInterval(function() {
+                var timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) { return clearInterval(interval); }
+                var particleCount = 50 * (timeLeft / duration);
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: random(0.1, 0.3), y: Math.random() - 0.2 } }));
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: random(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+        }
+    </script>
+</body>
+</html>
