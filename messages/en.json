@@ -1,0 +1,105 @@
+{
+  "common": {
+    "login": "Login",
+    "signup": "Sign up",
+    "logout": "Logout",
+    "home": "Home",
+    "language": "Language"
+  },
+  "nav": {
+    "lessons": "Lessons",
+    "practice": "Practice",
+    "profile": "Profile",
+    "settings": "Settings"
+  },
+  "auth": {
+    "loginTitle": "Welcome back",
+    "signupTitle": "Create a new account",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "name": "Full Name",
+    "emailPlaceholder": "enter your email",
+    "passwordPlaceholder": "enter your password",
+    "namePlaceholder": "enter your full name",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "loginButton": "Login",
+    "signupButton": "Sign up",
+    "loginError": "Login failed. Please check your credentials.",
+    "signupError": "Sign up failed. Please try again.",
+    "weakPassword": "Password must be at least 6 characters.",
+    "passwordMismatch": "Passwords do not match.",
+    "invalidEmail": "Invalid email address."
+  },
+  "home": {
+    "title": "Learn English Effectively",
+    "subtitle": "Improve your English skills with interactive lessons",
+    "startLearning": "Start Learning",
+    "viewLessons": "View Lessons",
+    "features": {
+      "interactive": {
+        "title": "Interactive Lessons",
+        "description": "Learn through interactive and engaging exercises"
+      },
+      "progress": {
+        "title": "Track Progress",
+        "description": "View your progress in real-time"
+      },
+      "review": {
+        "title": "Smart Review",
+        "description": "Review system helps you remember longer"
+      }
+    }
+  },
+  "lessons": {
+    "title": "Lessons",
+    "nounMaster": {
+      "title": "Noun Master Challenge",
+      "subtitle": "Noun Challenge v3.0",
+      "selectMode": "Select game mode",
+      "welcome": "Choose your challenge, students!",
+      "typesMode": {
+        "title": "Noun Types",
+        "description": "Full question bank (Common, Proper...)"
+      },
+      "functionsMode": {
+        "title": "Noun Functions",
+        "description": "Full question bank (Subject, Object...)"
+      },
+      "question": "Question",
+      "hint": "Hint",
+      "score": "Score",
+      "completed": "Completed!",
+      "totalScore": "Total Score",
+      "playAgain": "Play Again",
+      "continue": "Continue",
+      "review": {
+        "title": "Review Details",
+        "question": "Question",
+        "correct": "You chose correctly",
+        "wrong": "You chose",
+        "correctAnswer": "Correct answer"
+      }
+    }
+  },
+  "nounTypes": {
+    "common": "Common Noun",
+    "proper": "Proper Noun",
+    "abstract": "Abstract Noun",
+    "collective": "Collective Noun"
+  },
+  "nounFunctions": {
+    "subject": "Subject",
+    "objectVerb": "Object of Verb",
+    "complement": "Complement",
+    "possessive": "Possessive",
+    "objectPrep": "Object of Preposition"
+  },
+  "errors": {
+    "generic": "An error occurred. Please try again.",
+    "unauthorized": "You need to login to continue.",
+    "notFound": "Page not found.",
+    "serverError": "Server error. Please try again later."
+  }
+}

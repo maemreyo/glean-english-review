@@ -1,0 +1,105 @@
+{
+  "common": {
+    "login": "Đăng nhập",
+    "signup": "Đăng ký",
+    "logout": "Đăng xuất",
+    "home": "Trang chủ",
+    "language": "Ngôn ngữ"
+  },
+  "nav": {
+    "lessons": "Bài học",
+    "practice": "Luyện tập",
+    "profile": "Hồ sơ",
+    "settings": "Cài đặt"
+  },
+  "auth": {
+    "loginTitle": "Chào mừng trở lại",
+    "signupTitle": "Tạo tài khoản mới",
+    "email": "Email",
+    "password": "Mật khẩu",
+    "confirmPassword": "Xác nhận mật khẩu",
+    "name": "Họ tên",
+    "emailPlaceholder": "nhập email của bạn",
+    "passwordPlaceholder": "nhập mật khẩu",
+    "namePlaceholder": "nhập họ tên của bạn",
+    "noAccount": "Chưa có tài khoản?",
+    "hasAccount": "Đã có tài khoản?",
+    "loginButton": "Đăng nhập",
+    "signupButton": "Đăng ký",
+    "loginError": "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.",
+    "signupError": "Đăng ký thất bại. Vui lòng thử lại.",
+    "weakPassword": "Mật khẩu phải có ít nhất 6 ký tự.",
+    "passwordMismatch": "Mật khẩu không khớp.",
+    "invalidEmail": "Email không hợp lệ."
+  },
+  "home": {
+    "title": "Học Tiếng Anh Hiệu Quả",
+    "subtitle": "Nâng cao kỹ năng tiếng Anh của bạn với các bài học tương tác",
+    "startLearning": "Bắt đầu học",
+    "viewLessons": "Xem bài học",
+    "features": {
+      "interactive": {
+        "title": "Bài học tương tác",
+        "description": "Học qua các bài tập tương tác và thú vị"
+      },
+      "progress": {
+        "title": "Theo dõi tiến độ",
+        "description": "Xem sự tiến bộ của bạn theo thời gian thực"
+      },
+      "review": {
+        "title": "Ôn tập thông minh",
+        "description": "Hệ thống ôn tập giúp bạn nhớ lâu hơn"
+      }
+    }
+  },
+  "lessons": {
+    "title": "Bài học",
+    "nounMaster": {
+      "title": "Noun Master Challenge",
+      "subtitle": "Thử thách Danh từ v3.0",
+      "selectMode": "Chọn chế độ chơi",
+      "welcome": "Mời các bạn học sinh chọn thử thách!",
+      "typesMode": {
+        "title": "Phân loại Danh từ",
+        "description": "Toàn bộ kho câu hỏi (Common, Proper...)"
+      },
+      "functionsMode": {
+        "title": "Chức năng Danh từ",
+        "description": "Toàn bộ kho câu hỏi (Subject, Object...)"
+      },
+      "question": "Câu hỏi",
+      "hint": "Gợi ý",
+      "score": "Điểm",
+      "completed": "Hoàn thành!",
+      "totalScore": "Tổng điểm",
+      "playAgain": "Chơi lại",
+      "continue": "Tiếp tục",
+      "review": {
+        "title": "Chi tiết bài làm",
+        "question": "Câu",
+        "correct": "Bạn đã chọn đúng",
+        "wrong": "Bạn chọn",
+        "correctAnswer": "Đáp án đúng"
+      }
+    }
+  },
+  "nounTypes": {
+    "common": "Common Noun",
+    "proper": "Proper Noun",
+    "abstract": "Abstract Noun",
+    "collective": "Collective Noun"
+  },
+  "nounFunctions": {
+    "subject": "Chủ ngữ",
+    "objectVerb": "Tân ngữ động từ",
+    "complement": "Bổ ngữ",
+    "possessive": "Sở hữu cách",
+    "objectPrep": "Tân ngữ giới từ"
+  },
+  "errors": {
+    "generic": "Đã có lỗi xảy ra. Vui lòng thử lại.",
+    "unauthorized": "Bạn cần đăng nhập để tiếp tục.",
+    "notFound": "Không tìm thấy trang.",
+    "serverError": "Lỗi máy chủ. Vui lòng thử lại sau."
+  }
+}
