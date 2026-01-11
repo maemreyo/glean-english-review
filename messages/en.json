@@ -59,6 +59,9 @@
       "subtitle": "Noun Challenge v3.0",
       "selectMode": "Select game mode",
       "welcome": "Choose your challenge, students!",
+      "previousBest": "Previous Best Score",
+      "incorrect": "Not correct!",
+      "saving": "Saving results...",
       "typesMode": {
         "title": "Noun Types",
         "description": "Full question bank (Common, Proper...)"

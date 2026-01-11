@@ -59,6 +59,9 @@
       "subtitle": "Thử thách Danh từ v3.0",
       "selectMode": "Chọn chế độ chơi",
       "welcome": "Mời các bạn học sinh chọn thử thách!",
+      "previousBest": "Điểm cao nhất trước đó",
+      "incorrect": "Chưa chính xác!",
+      "saving": "Đang lưu kết quả...",
       "typesMode": {
         "title": "Phân loại Danh từ",
         "description": "Toàn bộ kho câu hỏi (Common, Proper...)"

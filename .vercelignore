@@ -1,0 +1,12 @@
+# Documentation
+README.md
+docs/
+
+# Development files
+.vscode/
+.git/
+*.log
+
+# Environment files (should be set in Vercel dashboard)
+.env.local
+.env.*.local
