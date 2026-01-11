@@ -1,65 +1,34 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+import type { Database, Json } from './generated-types'
+
+// Re-export the generated Database type
+export type { Database } from './generated-types'
+export type { Json } from './generated-types'
 
 // Lesson History Answer Type (stored in answers JSONB column)
+// Use index signature to satisfy Json type compatibility
 export interface LessonHistoryAnswer {
   question: string
   userChoice: string
   correctChoice: string
   isCorrect: boolean
   explain: string
+  [key: string]: Json | undefined  // Index signature for Json compatibility
 }
 
 export type LessonHistoryAnswers = LessonHistoryAnswer[]
 
-export interface Database {
-  public: {
-    Tables: {
-      lesson_history: {
-        Row: {
-          id: string
-          user_id: string
-          lesson_id: string
-          lesson_type: string
-          score: number
-          max_score: number
-          completed_at: string
-          answers: LessonHistoryAnswers
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          lesson_id: string
-          lesson_type: string
-          score: number
-          max_score: number
-          completed_at?: string
-          answers?: LessonHistoryAnswers
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          lesson_id?: string
-          lesson_type?: string
-          score?: number
-          max_score?: number
-          completed_at?: string
-          answers?: LessonHistoryAnswers
-          created_at?: string
-        }
-      }
-    }
-  }
+// Type assertion helper for LessonHistoryAnswers to Json
+export function toJson(answers: LessonHistoryAnswers): Json {
+  return answers as Json
 }
 
-// Supabase-generated types (will be updated after migration)
+// Type guard/helper to cast Json to LessonHistoryAnswers
+export function toLessonHistoryAnswers(data: Json | null): LessonHistoryAnswers {
+  if (!data || !Array.isArray(data)) return []
+  return data as LessonHistoryAnswers
+}
+
+// Convenience type helpers for Supabase tables
 export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row']
 export type TablesInsert<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Insert']
 export type TablesUpdate<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Update']

@@ -6,6 +6,7 @@ import type {
   LessonHistoryInsert,
   LessonHistoryAnswers
 } from '@/lib/supabase/types'
+import { toJson } from '@/lib/supabase/types'
 
 /**
  * Saves a completed quiz attempt to the database
@@ -34,7 +35,7 @@ export async function saveLessonAttempt(data: {
       lesson_type: data.lesson_type,
       score: data.score,
       max_score: data.max_score,
-      answers: data.answers,
+      answers: toJson(data.answers),
     }
 
     const { data: result, error } = await supabase
