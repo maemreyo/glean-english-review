@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 // @ts-ignore - canvas-confetti doesn't have types
 import confetti from 'canvas-confetti'
@@ -44,7 +44,10 @@ export default function LessonQuiz({ lessonId, previousBestScore }: LessonQuizPr
   const [feedbackExplanation, setFeedbackExplanation] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   
-  const audioRef = useRef<HTMLAudioElement | null>(null)
+  // Track failed audio URLs to prevent repeated attempts
+  const failedAudioRef = useRef<Set<string>>(new Set())
+  // Store active audio elements for cleanup
+  const activeAudioRefs = useRef<HTMLAudioElement[]>([])
 
   // Shuffle array helper
   const shuffleArray = <T,>(array: T[]): T[] => {
@@ -56,13 +59,53 @@ export default function LessonQuiz({ lessonId, previousBestScore }: LessonQuizPr
     return shuffled
   }
 
-  // Play sound helper
-  const playSound = (type: 'correct' | 'wrong' | 'win') => {
+  // Play sound helper with graceful error handling
+  const playSound = useCallback((type: 'correct' | 'wrong' | 'win') => {
     const src = type === 'correct' ? SOUND_CORRECT : type === 'wrong' ? SOUND_WRONG : SOUND_WIN
+    
+    // Skip if this audio source has previously failed
+    if (failedAudioRef.current.has(src)) {
+      return // Silent mode - don't attempt to load failed audio again
+    }
+    
     const audio = new Audio(src)
     audio.currentTime = 0
-    audio.play().catch(console.error)
-  }
+    
+    // Handle audio loading errors
+    audio.addEventListener('error', () => {
+      failedAudioRef.current.add(src)
+      // Remove from active refs
+      const index = activeAudioRefs.current.indexOf(audio)
+      if (index > -1) {
+        activeAudioRefs.current.splice(index, 1)
+      }
+    })
+    
+    // Store reference for cleanup
+    activeAudioRefs.current.push(audio)
+    
+    // Attempt to play, fail silently if it doesn't work
+    audio.play().catch(() => {
+      // Play failed - could be due to autoplay policy, rapid unmount, etc.
+      // Don't add to failedAudioRef here as it might be a transient issue
+    })
+  }, [])
+
+  // Cleanup function to stop all active audio when component unmounts
+  const cleanupAudio = useCallback(() => {
+    activeAudioRefs.current.forEach(audio => {
+      audio.pause()
+      audio.currentTime = 0
+    })
+    activeAudioRefs.current = []
+  }, [])
+
+  // Clean up audio on unmount
+  useEffect(() => {
+    return () => {
+      cleanupAudio()
+    }
+  }, [cleanupAudio])
 
   // Start game
   const startGame = (mode: GameMode) => {
@@ -116,14 +159,12 @@ export default function LessonQuiz({ lessonId, previousBestScore }: LessonQuizPr
       setScore(prev => prev + 10)
       
       setTimeout(() => {
-        setCurrentIndex(prev => {
-          if (prev + 1 >= currentQuestions.length) {
-            endGame()
-            return prev
-          }
-          return prev + 1
-        })
-        setIsAnswering(true)
+        if (currentIndex + 1 >= currentQuestions.length) {
+          endGame()
+        } else {
+          setCurrentIndex(prev => prev + 1)
+          setIsAnswering(true)
+        }
       }, 800)
     } else {
       playSound('wrong')
@@ -135,14 +176,12 @@ export default function LessonQuiz({ lessonId, previousBestScore }: LessonQuizPr
   // Continue to next question after wrong answer
   const continueToNext = () => {
     setShowFeedback(false)
-    setCurrentIndex(prev => {
-      if (prev + 1 >= currentQuestions.length) {
-        endGame()
-        return prev
-      }
-      return prev + 1
-    })
-    setIsAnswering(true)
+    if (currentIndex + 1 >= currentQuestions.length) {
+      endGame()
+    } else {
+      setCurrentIndex(prev => prev + 1)
+      setIsAnswering(true)
+    }
   }
 
   // End game and save results

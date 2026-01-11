@@ -236,7 +236,7 @@ export async function getBestAttempt(
       query = query.eq('lesson_type', lessonType)
     }
 
-    const { data, error } = await query.single()
+    const { data, error } = await query.maybeSingle()
 
     if (error) {
       console.error('Error fetching best attempt:', error)

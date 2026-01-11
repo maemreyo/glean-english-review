@@ -11,14 +11,20 @@ const intlMiddleware = createMiddleware({
 });
 
 export async function middleware(request: NextRequest) {
-  // First handle locale routing
+  // First handle locale routing - this may redirect to add locale prefix
   const intlResponse = intlMiddleware(request);
   
-  // Then handle auth session
+  // If intl middleware returns a redirect, honor it first
+  // This ensures URLs get their locale prefix before auth checks
+  if (intlResponse.status >= 300 && intlResponse.status < 400) {
+    return intlResponse;
+  }
+  
+  // Then handle auth session (only if no redirect from intl)
   const authResponse = await updateSession(request);
   
-  // Return auth response if it exists, otherwise return intl response
-  return authResponse || intlResponse;
+  // Return auth response if it's a redirect, otherwise return intl response
+  return authResponse.status >= 300 && authResponse.status < 400 ? authResponse : intlResponse;
 }
 
 export const config = {

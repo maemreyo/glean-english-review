@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clear Corrupted Cookies</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 600px;
+      margin: 100px auto;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 { color: #e11d48; }
+    .success { color: #16a34a; font-weight: bold; }
+    .info { background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0; }
+    button {
+      background: #4f46e5;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover { background: #4338ca; }
+    #log { 
+      text-align: left; 
+      background: #1e293b; 
+      color: #10b981; 
+      padding: 15px; 
+      border-radius: 8px; 
+      font-family: monospace; 
+      max-height: 200px; 
+      overflow-y: auto; 
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🍪 Clear Corrupted Cookies</h1>
+  
+  <div class="info">
+    <p><strong>Issue:</strong> A corrupted cookie with value <code>[object Object]</code> is causing HTTP 431 errors.</p>
+    <p><strong>Solution:</strong> This page will clear all corrupted cookies from localhost:3003</p>
+  </div>
+
+  <button onclick="clearAllCookies()">Clear All Cookies</button>
+  
+  <div id="log"></div>
+
+  <script>
+    function log(msg) {
+      const logDiv = document.getElementById('log');
+      logDiv.innerHTML += msg + '<br>';
+    }
+
+    function clearAllCookies() {
+      document.getElementById('log').innerHTML = '';
+      log('🔍 Scanning for corrupted cookies...');
+      
+      const cookies = document.cookie.split('; ');
+      let clearedCount = 0;
+      
+      // First, clear all cookies we can see
+      for (const cookie of cookies) {
+        const eqIndex = cookie.indexOf('=');
+        if (eqIndex === -1) continue;
+        
+        const name = cookie.substring(0, eqIndex);
+        const value = cookie.substring(eqIndex + 1);
+        
+        const isCorrupted = value === '[object Object]' || value === 'undefined' || value === '';
+        
+        log(`Found cookie: ${name} = ${isCorrupted ? '❌ CORRUPTED' : '✓ OK'} ${value.substring(0, 50)}...`);
+        
+        // Clear the cookie with all possible path/domain combinations
+        const paths = ['/', '/vi', '/en'];
+        const domains = [location.hostname, `.${location.hostname}`, ''];
+        
+        for (const path of paths) {
+          for (const domain of domains) {
+            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path}${domain ? `; domain=${domain}` : ''};`;
+          }
+        }
+        
+        if (isCorrupted) clearedCount++;
+      }
+      
+      // Clear any remaining cookies by setting them to expire
+      const allCookies = document.cookie.split('; ');
+      log(`🧹 Attempting to clear ${allCookies.length} cookie(s)...`);
+      
+      for (const cookie of allCookies) {
+        const eqIndex = cookie.indexOf('=');
+        if (eqIndex === -1) continue;
+        const name = cookie.substring(0, eqIndex);
+        log(`Clearing: ${name}`);
+        
+        // Try multiple ways to clear
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${location.hostname};`;
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${location.hostname};`;
+      }
+      
+      log(`<span class="success">✅ Done! Cleared ${clearedCount} corrupted cookie(s).</span>`);
+      log('Please refresh your application page now.');
+    }
+
+    // Auto-run on page load
+    window.onload = function() {
+      log('⚠️ Please click the button above to clear cookies.');
+    };
+  </script>
+</body>
+</html>

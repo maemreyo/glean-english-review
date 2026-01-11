@@ -14,9 +14,11 @@ export async function createClient() {
         },
         setAll(cookiesToSet) {
           try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
+            cookiesToSet.forEach(({ name, value, options }) => {
+              // Ensure cookie value is always a string - objects will cause '[object Object]'
+              const cookieValue = typeof value === 'string' ? value : JSON.stringify(value)
+              cookieStore.set(name, cookieValue, options)
+            })
           } catch {
             // The `setAll` method was called from a Server Component.
             // This can be ignored if you have middleware refreshing

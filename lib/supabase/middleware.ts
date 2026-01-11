@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { defaultLocale } from '@/i18n/config'
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -12,16 +13,23 @@ export async function updateSession(request: NextRequest) {
     {
       cookies: {
         getAll() {
-          return request.cookies.getAll()
+          // Filter out corrupted cookies that have '[object Object]' as value
+          return request.cookies.getAll().filter(cookie => {
+            const isCorrupted = cookie.value === '[object Object]' ||
+                               typeof cookie.value !== 'string' ||
+                               cookie.value === undefined
+            if (isCorrupted) {
+              console.log(`[DEBUG] Filtered corrupted cookie: ${cookie.name} = ${cookie.value}`)
+            }
+            return !isCorrupted
+          })
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({
-            request,
+          cookiesToSet.forEach((cookie) => {
+            // Ensure cookie value is always a string - objects will cause '[object Object]'
+            const value = typeof cookie.value === 'string' ? cookie.value : JSON.stringify(cookie.value)
+            supabaseResponse.cookies.set(cookie.name, value, cookie.options)
           })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
         },
       },
     }
@@ -38,11 +46,13 @@ export async function updateSession(request: NextRequest) {
   if (
     !user &&
     !request.nextUrl.pathname.startsWith('/login') &&
+    !request.nextUrl.pathname.startsWith('/signup') &&
     !request.nextUrl.pathname.startsWith('/auth')
   ) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone()
-    url.pathname = '/login'
+    // Redirect to locale-prefixed login path (e.g., /vi/login for default locale)
+    url.pathname = `/${defaultLocale}/login`
     return NextResponse.redirect(url)
   }
 

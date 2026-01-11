@@ -13,6 +13,8 @@
     "settings": "Cài đặt"
   },
   "auth": {
+    "login": "Đăng nhập",
+    "signup": "Đăng ký",
     "loginTitle": "Chào mừng trở lại",
     "signupTitle": "Tạo tài khoản mới",
     "email": "Email",

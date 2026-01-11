@@ -13,6 +13,8 @@
     "settings": "Settings"
   },
   "auth": {
+    "login": "Login",
+    "signup": "Sign up",
     "loginTitle": "Welcome back",
     "signupTitle": "Create a new account",
     "email": "Email",
